@@ -14,7 +14,7 @@
 window.onload = function () {
 
   const SPECIAL_KOD = "safevery148163267"; // DIN KOD
-  const REDIRECT_URL = "https://exempel.se"; // ÄNDRA HIT
+  const REDIRECT_URL = "https://youtube.se"; // ÄNDRA HIT
 
   Quagga.init({
     inputStream: {
