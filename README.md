@@ -79,24 +79,32 @@ function startBarcode() {
 
 function startQR() {
   document.getElementById("title").innerText = "Skanna QR-kod";
-  const detector = new BarcodeDetector({ formats: ["qr_code"] });
-  const video = document.createElement("video");
-  video.setAttribute("autoplay", "");
-  document.getElementById("scanner").innerHTML = "";
-  document.getElementById("scanner").appendChild(video);
 
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-    .then(stream => {
-      video.srcObject = stream;
-      setInterval(async () => {
-        const codes = await detector.detect(video);
-        if (codes.length && codes[0].rawValue === QRCODE) {
-          stream.getTracks().forEach(t => t.stop());
-          document.getElementById("scanner").classList.add("hidden");
-          document.getElementById("manualCode").classList.remove("hidden");
-        }
-      }, 1000);
-    });
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      target: document.querySelector("#scanner"),
+      constraints: { facingMode: "environment" }
+    },
+    decoder: {
+      readers: ["qr_reader"]
+    }
+  }, err => {
+    if (err) {
+      alert("Kunde inte starta QR-kamera");
+      return;
+    }
+    Quagga.start();
+  });
+
+  Quagga.onDetected(res => {
+    const code = res.codeResult.code;
+    if (code === QRCODE) {
+      Quagga.stop();
+      document.getElementById("scanner").classList.add("hidden");
+      document.getElementById("manualCode").classList.remove("hidden");
+    }
+  });
 }
 
 function checkManual() {
