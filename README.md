@@ -1,169 +1,46 @@
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-<meta charset="utf-8">
-<title>SafeVery</title>
-<script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
-<style>
-body { font-family: Arial, sans-serif; padding: 20px; }
-.hidden { display: none; }
-button { padding: 12px; font-size: 16px; margin: 5px; }
-input { padding: 10px; font-size: 16px; margin: 5px; width: 90%; }
-#scanner { width: 100%; height: 300px; border: 1px solid #ccc; }
-</style>
-</head>
-<body>
+# NAS Reels (Android)
 
-<h2 id="title">Skanna streckkod</h2>
+TikTok-liknande Android-app (Kotlin) som spelar vertikala videor från en NAS på lokalt nätverk.
 
-<div id="scanner"></div>
+## Funktioner
 
-<div id="manualCode" class="hidden">
-  <p>Skriv in specialkod:</p>
-  <input id="manualInput" placeholder="safevery">
-  <button onclick="checkManual()">OK</button>
-</div>
+- Vertikal scroll via `RecyclerView` + `PagerSnapHelper`
+- Autoplay på synlig video
+- Loop av varje video
+- Inga spelkontroller i UI
+- Inställningar för:
+  - NAS IP-adress
+  - Antal videor
+- URL-format genereras automatiskt:
+  - `http://<ip>/videos/1.mp4`
+  - `http://<ip>/videos/2.mp4`
+  - osv.
 
-<div id="choice" class="hidden">
-  <button onclick="chooseRole('fa')">FÅ</button>
-  <button onclick="chooseRole('skicka')">SKICKA</button>
-</div>
+## Krav
 
-<div id="form" class="hidden">
-  <p>Ditt namn:</p>
-  <input id="name">
-  <p>Telefonnummer:</p>
-  <input id="phone">
-  <button onclick="submitForm()">Fortsätt</button>
-</div>
+- Android Studio (Ladybug eller nyare rekommenderas)
+- Android SDK 34
+- En NAS/server tillgänglig på samma WiFi/LAN
 
-<div id="nfc" class="hidden">
-  <p id="nfcText"></p>
-  <button onclick="writeNFC()">Skriv till NFC</button>
-  <button onclick="readNFC()">Läs NFC</button>
-</div>
+## Köra appen
 
-<script>
-const BARCODE = "safevery148163267";
-const QRCODE = "safevery148163267123465465sdadyguhasjhmvsdgfgffgdffgfuysyduafgda";
-const MANUAL = "safevery";
+1. Öppna projektet i Android Studio.
+2. Låt Gradle synka beroenden.
+3. Kör appen på fysisk Android-enhet (samma nätverk som NAS).
+4. Öppna inställningar i appen och ange rätt IP + antal videor.
 
-let step = 1;
-let role = "";
-let myData = "";
+## Bygga APK
 
-window.onload = () => startBarcode();
+I Android Studio:
 
-function startBarcode() {
-  Quagga.init({
-    inputStream: {
-      type: "LiveStream",
-      target: document.querySelector("#scanner"),
-      constraints: { facingMode: "environment" }
-    },
-    decoder: { readers: ["code_128_reader", "ean_reader"] }
-  }, err => {
-    if (err) return alert("Kamera fel");
-    Quagga.start();
-  });
+- `Build` → `Build Bundle(s) / APK(s)` → `Build APK(s)`
 
-  Quagga.onDetected(res => {
-    const code = res.codeResult.code;
-    if (step === 1 && code === BARCODE) {
-      step = 2;
-      Quagga.stop();
-      startQR();
-    }
-  });
-}
+Eller via terminal (om Gradle wrapper finns):
 
-function startQR() {
-  document.getElementById("title").innerText = "Skanna QR-kod";
+```bash
+./gradlew assembleDebug
+```
 
-  Quagga.init({
-    inputStream: {
-      type: "LiveStream",
-      target: document.querySelector("#scanner"),
-      constraints: { facingMode: "environment" }
-    },
-    decoder: {
-      readers: ["qr_reader"]
-    }
-  }, err => {
-    if (err) {
-      alert("Kunde inte starta QR-kamera");
-      return;
-    }
-    Quagga.start();
-  });
+APK hamnar normalt i:
 
-  Quagga.onDetected(res => {
-    const code = res.codeResult.code;
-    if (code === QRCODE) {
-      Quagga.stop();
-      document.getElementById("scanner").classList.add("hidden");
-      document.getElementById("manualCode").classList.remove("hidden");
-    }
-  });
-}
-
-function checkManual() {
-  if (document.getElementById("manualInput").value === MANUAL) {
-    document.getElementById("manualCode").classList.add("hidden");
-    document.getElementById("choice").classList.remove("hidden");
-  } else {
-    alert("Fel kod");
-  }
-}
-
-function chooseRole(r) {
-  role = r;
-  document.getElementById("choice").classList.add("hidden");
-  document.getElementById("form").classList.remove("hidden");
-}
-
-function submitForm() {
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  myData = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-TEL:${phone}
-END:VCARD`;
-
-  document.getElementById("form").classList.add("hidden");
-  document.getElementById("nfc").classList.remove("hidden");
-  document.getElementById("nfcText").innerText =
-    role === "skicka"
-      ? "Skriv din kontakt till NFC"
-      : "Läs kontakt från NFC";
-}
-
-async function writeNFC() {
-  try {
-    const writer = new NDEFWriter();
-    await writer.write({
-      records: [{ recordType: "mime", mediaType: "text/vcard", data: myData }]
-    });
-    alert("Kontakt skriven till NFC");
-  } catch {
-    alert("NFC-skrivning misslyckades");
-  }
-}
-
-async function readNFC() {
-  try {
-    const reader = new NDEFReader();
-    await reader.scan();
-    reader.onreading = e => {
-      const text = new TextDecoder().decode(e.message.records[0].data);
-      alert("Kontakt mottagen:\n\n" + text);
-    };
-  } catch {
-    alert("NFC-läsning misslyckades");
-  }
-}
-</script>
-
-</body>
-</html>
+`app/build/outputs/apk/debug/app-debug.apk`
