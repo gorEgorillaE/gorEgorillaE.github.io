@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">NAS Reels</string>
+    <string name="settings_saved">Inställningar sparade</string>
+    <string name="settings_invalid_input">Ogiltigt IP eller antal videor</string>
+    <string name="settings_server_ip">NAS IP-adress</string>
+    <string name="settings_video_count">Antal videor</string>
+    <string name="settings_save">Spara</string>
+</resources>
