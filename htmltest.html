@@ -1,12 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
 <head>
+    <meta charset="UTF-8">
     <title>Min sida</title>
+
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+        }
+
+        header {
+            background-color: #222;
+            padding: 20px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            border-radius: 10px;
+        }
+
+        a {
+            color: #00bfff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #222;
+            font-size: 14px;
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>Hej!</h1>
-    <p>Detta är en enkel HTML-sida.</p>
+<header>
+    Min NAS Server
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Välkommen!</h2>
+        <p>Detta är min server som hostar videor.</p>
+    </div>
+
+    <div class="card">
+        <h2>Videos</h2>
+        <p><a href="/videos/">Öppna videomappen</a></p>
+    </div>
+
+</div>
+
+<footer>
+    SkolTok Server © 2026
+</footer>
 
 </body>
 </html>
